@@ -1,0 +1,25 @@
+body {
+    font-family: fantasy;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    background-image: url('../img/bedroom.jpg');
+    background-size: 100%;
+}
+
+.container {
+    text-align: center;
+}
+
+.title {
+    color: darkblue;
+    text-align: center;
+    font-size: 6rem;
+}
+
+.button {
+    font-family: fantasy;
+    width: 20%;
+    box-sizing: border-box;
+    font-size: 30px;
+}

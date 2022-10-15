@@ -1,0 +1,31 @@
+body {
+    background-image: url('../img/bedroom.jpg');
+    background-size: 100%;
+    margin: 0;
+}
+
+.title {
+    font-family: fantasy;
+    text-align: center;
+    font-size: 2rem;
+    color: #f5f5f5;
+    margin-top: 10px;
+}
+
+.container {
+    margin: 0 20vw;
+}
+
+.figure {
+    font-family: fantasy;
+    font-size: 500%;
+}
+
+div.button {
+    font-family: fantasy;
+    font-size: 400%;
+}
+
+.cali_image {
+    border-image: 1em;
+}
