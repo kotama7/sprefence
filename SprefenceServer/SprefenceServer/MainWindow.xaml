@@ -1,0 +1,19 @@
+﻿<Window x:Class="SprefenceServer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SprefenceServer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="85" FontSize="18"/>
+        <ComboBox x:Name="Port" ItemsSource="{Binding Ports, Mode=OneWay}" HorizontalAlignment="Left" Margin="100,14,0,0" VerticalAlignment="Top" Width="120" FontSize="16"/>
+        <Button x:Name="Search" Content="Search" HorizontalAlignment="Left" Margin="262,16,0,0" VerticalAlignment="Top" FontSize="18" Click="Search_Click"/>
+        <Button x:Name="Connect" Content="Connect" HorizontalAlignment="Center" Margin="0,16,0,0" VerticalAlignment="Top" FontSize="18" IsEnabled="False" Click="Connect_Click"/>
+        <Button x:Name="Disconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="481,16,0,0" VerticalAlignment="Top" FontSize="18" IsEnabled="False" Click="Disconnect_Click"/>
+        <Border BorderBrush="Black" BorderThickness="1" Margin="10,200,10,10"/>
+        <TextBlock x:Name="LogBox" Margin="10,200,10,10" TextWrapping="Wrap"/>
+        <Label Content="Log" HorizontalAlignment="Left" Margin="20,160,0,0" VerticalAlignment="Top" FontSize="18"/>
+    </Grid>
+</Window>
