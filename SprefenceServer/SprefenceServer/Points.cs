@@ -14,4 +14,9 @@ namespace SprefenceServer
         public float x { get; set; }
         public float y { get; set; }
     }
+
+    [Serializable]
+    public class Command {
+        public string? type { get; set; }
+    }
 }

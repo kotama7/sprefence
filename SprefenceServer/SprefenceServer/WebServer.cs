@@ -23,6 +23,7 @@ namespace SprefenceServer
         string[] m_contents;
         byte[] m_buffer = new byte[1024 * 1024];
         DateTime updated;
+        byte[] resOK;
 
         internal WebServer(TextBlock logbox, SynchronizationContext mainThread)
         {
@@ -31,7 +32,9 @@ namespace SprefenceServer
             m_listener = new HttpListener();
             m_listener.Prefixes.Clear();
             m_listener.Prefixes.Add(@"http://+:8080/");
-            m_contents = Directory.GetFiles("contents").Select(p => Path.GetFileName(p)).ToArray();
+            m_contents = Directory.GetFiles("contents", "*", SearchOption.AllDirectories).Select(p => p.Replace("contents", "")).Select(p => p.Replace("\\", "/")).ToArray();
+            var resStr = "{\"result\":\"OK\"}";
+            resOK = Encoding.UTF8.GetBytes(resStr);
         }
 
         internal void Open(SerialPort port)
@@ -85,19 +88,20 @@ namespace SprefenceServer
                 var context = await m_listener.GetContextAsync();
                 var request = context.Request;
                 var response = context.Response;
-                var requestPath = Path.GetFileName(request?.Url?.LocalPath);
+                var requestPath = request?.Url?.LocalPath;
                 if (request != null && requestPath != null)
                 {
                     if (m_contents.Contains(requestPath))
                     {
-                        var fileContent = File.ReadAllBytes(Path.Combine("contents", requestPath));
+                        var fileContent = File.ReadAllBytes("contents" + requestPath);
                         response.OutputStream.Write(fileContent);
+                        response.ContentEncoding = Encoding.UTF8;
                         m_mainThread.Send((_) =>
                         {
                             m_logBox.Text += "\nGet : " + requestPath;
                         }, null);
                     }
-                    else if (requestPath == "camera.jpg")
+                    else if (requestPath == "/camera.jpg")
                     {
                         port.Write("camera");
                         updated = DateTime.Now;
@@ -145,7 +149,7 @@ namespace SprefenceServer
                             m_logBox.Text += "\nGet : " + requestPath + " " + res.Count + " bytes";
                         }, null);
                     }
-                    else if (request.HttpMethod == HttpMethod.Post.Method)
+                    else if (request.HttpMethod == HttpMethod.Post.Method && requestPath == "/sethazard")
                     {
                         var body = new StreamReader(request.InputStream, request.ContentEncoding).ReadToEnd();
                         var points = JsonSerializer.Deserialize<Points>(body);
@@ -156,11 +160,43 @@ namespace SprefenceServer
                         var rb = top?.Skip(2).First().x < top?.Skip(3).First().x ? top?.Skip(3).First() : top?.Skip(2).First();
                         var dlt = (lt?.y - lb?.y) / (lt?.x - lb?.x);
                         var drt = (rt?.y - rb?.y) / (rt?.x - rb?.x);
-                        var ltp = lt.x + (1 - lt.y) / dlt;
-                        var lbp = lb.x + lb.y / dlt;
-                        var rtp = rt.x + (1 - rt.y) / drt;
-                        var rbp = rt.x + rt.y / drt;
+                        var ltp = lt.x + lt.y / dlt;
+                        var lbp = lb.x + (1 - lb.y) / dlt;
+                        var rtp = rt.x + rt.y / drt;
+                        var rbp = rt.x + (1 - rt.y) / drt;
+                        if (ltp < 0)
+                        {
+                            ltp = 0;
+                        }
+                        if (lbp < 0)
+                        {
+                            lbp = 0;
+                        }
+                        if (rtp > 1)
+                        {
+                            rtp = 1;
+                        }
+                        if (rbp > 1)
+                        {
+                            rbp = 1;
+                        }
                         port.Write("set " + ltp?.ToString("0.00") + " " + lbp?.ToString("0.00") + " " + rtp?.ToString("0.00") + " " + rbp?.ToString("0.00"));
+                        response.OutputStream.Write(resOK);
+                    }
+                    else if(request.HttpMethod == HttpMethod.Post.Method && requestPath == "/switch")
+                    {
+                        var body = new StreamReader(request.InputStream, request.ContentEncoding).ReadToEnd();
+                        var command = JsonSerializer.Deserialize<Command>(body);
+                        if (command?.type == "on")
+                        {
+                            port.Write("on");
+                            response.OutputStream.Write(resOK);
+                        }
+                        else if (command?.type == "off")
+                        {
+                            port.Write("off");
+                            response.OutputStream.Write(resOK);
+                        }
                     }
                     else
                     {
