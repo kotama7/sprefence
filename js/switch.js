@@ -2,7 +2,7 @@ const switchURL = 'http://localhost:8080/switch';
 
 const switchOn = function() {
     const command = { "type": "on" };
-    fetch(setURL, {
+    fetch(switchURL, {
             method: 'POST',
             body: JSON.stringify(command)
         }).then(res => res.json())
@@ -11,7 +11,7 @@ const switchOn = function() {
 
 const switchOff = function() {
     const command = { "type": "off" };
-    fetch(setURL, {
+    fetch(switchURL, {
             method: 'POST',
             body: JSON.stringify(command)
         }).then(res => res.json())

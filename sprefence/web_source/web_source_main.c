@@ -201,13 +201,6 @@ int main(int argc, char *argv[])
   int rwfd;
   int ret;
 
-  ret = camera_prepare();
-
-  if (ret < 0)
-  {
-    return ret;
-  }
-
   /* Initialize the USB serial driver */
 
   printf("%s: Registering USB serial driver\n", __func__);
@@ -277,6 +270,14 @@ int main(int argc, char *argv[])
     if (!strncmp(buff, "camera", 6))
     {
       printf("recived : camera\n");
+      ret = camera_prepare();
+
+      if (ret < 0)
+      {
+        printf("camera prepare failed\n");
+        return ret;
+      }
+
       ret = set_camimage();
       if (ret < 0)
       {
@@ -318,7 +319,7 @@ int main(int argc, char *argv[])
         }
         wbuf[wSize - 1] = append;
         total_size += write(rwfd, wbuf, wSize);
-        
+
         if (i % 75 == 74)
         {
           printf("%d\n", i);
@@ -330,20 +331,24 @@ int main(int argc, char *argv[])
       write(rwfd, "EndOfFile", 10);
       tcdrain(rwfd);
       printf("writed : %d bytes\n", total_size);
-      FILE* fp = fopen("/mnt/sd0/PIC/uyvy.yuv", "wb");
-      if(fp == NULL){
+      FILE *fp = fopen("/mnt/sd0/PIC/uyvy.yuv", "wb");
+      if (fp == NULL)
+      {
         printf("fail to open file.");
         return -1;
       }
       fwrite(mem, sizeof(unsigned char), YUVSIZE, fp);
       fclose(fp);
+      close(video_fd);
       free(frame_mem);
+      video_uninitialize();
     }
     else if (!strncmp(buff, "set", 3))
     {
       printf("recived : set\n");
-      FILE* fp = fopen("/mnt/sd0/CONFIG/hazard.ini", "w");
-      if(fp == NULL){
+      FILE *fp = fopen("/mnt/sd0/CONFIG/hazard.ini", "w");
+      if (fp == NULL)
+      {
         printf("fail to open file.");
         return -1;
       }
@@ -353,8 +358,9 @@ int main(int argc, char *argv[])
     else if (!strncmp(buff, "on", 2))
     {
       printf("recived : on\n");
-      FILE* fp = fopen("/mnt/sd0/CONFIG/switch.ini", "w");
-      if(fp == NULL){
+      FILE *fp = fopen("/mnt/sd0/CONFIG/switch.ini", "w");
+      if (fp == NULL)
+      {
         printf("fail to open file.");
         return -1;
       }
